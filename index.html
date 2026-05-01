@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Canada PR Eligibility Checker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --red:    #D52B1E;
+      --red-dk: #A3180E;
+      --white:  #FAFAF7;
+      --cream:  #F2EDE4;
+      --dark:   #1A1A1A;
+      --mid:    #4A4A4A;
+      --border: #D9D3C9;
+      --gold:   #C9A84C;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+
+    /* === CARD === */
+    .widget {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      width: 100%;
+      max-width: 560px;
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(0,0,0,.10), 0 2px 8px rgba(0,0,0,.06);
+    }
+
+    /* === HEADER === */
+    .header {
+      background: var(--red);
+      padding: 36px 36px 32px;
+      position: relative;
+      overflow: hidden;
+    }
+    .header::before {
+      content: '🍁';
+      font-size: 140px;
+      position: absolute;
+      right: -18px;
+      top: -24px;
+      opacity: .08;
+      pointer-events: none;
+      line-height: 1;
+    }
+    .header-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.65);
+      margin-bottom: 10px;
+    }
+    .header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(22px, 5vw, 28px);
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.2;
+    }
+    .header p {
+      margin-top: 10px;
+      font-size: 13px;
+      color: rgba(255,255,255,.75);
+      font-weight: 300;
+      line-height: 1.6;
+    }
+
+    /* === BODY === */
+    .body {
+      padding: 32px 36px 36px;
+    }
+
+    /* === FIELD === */
+    .field {
+      margin-bottom: 22px;
+    }
+    .field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--mid);
+      margin-bottom: 8px;
+    }
+    .field select {
+      width: 100%;
+      padding: 13px 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--dark);
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: 3px;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234A4A4A' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      cursor: pointer;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .field select:focus {
+      outline: none;
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px rgba(213,43,30,.10);
+    }
+    .field select:hover { border-color: #bbb; }
+
+    /* === DIVIDER === */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 28px 0;
+    }
+
+    /* === BUTTON === */
+    .btn {
+      width: 100%;
+      padding: 15px;
+      background: var(--red);
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: background .2s, transform .1s;
+    }
+    .btn:hover  { background: var(--red-dk); }
+    .btn:active { transform: scale(.98); }
+
+    /* === RESULT === */
+    .result {
+      margin-top: 24px;
+      padding: 20px 22px;
+      border-radius: 3px;
+      border-left: 4px solid transparent;
+      display: none;
+      animation: fadeIn .35s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .result.strong  { background: #EDFAF2; border-color: #27AE60; }
+    .result.moderate{ background: #FFF8EC; border-color: var(--gold); }
+    .result.weak    { background: #FEF0EF; border-color: var(--red); }
+
+    .result .r-tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .result.strong   .r-tag { color: #1D8348; }
+    .result.moderate .r-tag { color: #9A6E00; }
+    .result.weak     .r-tag { color: var(--red-dk); }
+
+    .result .r-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+    .result .r-body {
+      font-size: 13px;
+      color: var(--mid);
+      line-height: 1.65;
+    }
+    .result .r-note {
+      margin-top: 12px;
+      font-size: 11px;
+      color: #888;
+      font-style: italic;
+    }
+
+    /* === FOOTER === */
+    .footer {
+      padding: 14px 36px;
+      background: var(--cream);
+      border-top: 1px solid var(--border);
+      font-size: 11px;
+      color: #999;
+      text-align: center;
+    }
+
+    /* === MOBILE === */
+    @media (max-width: 480px) {
+      .header, .body { padding-left: 22px; padding-right: 22px; }
+      .footer { padding-left: 22px; padding-right: 22px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="widget">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-label">Free Eligibility Tool</div>
+    <h1>Canada PR Eligibility Checker</h1>
+    <p>Answer 3 quick questions to get an instant snapshot of your Permanent Residency potential.</p>
+  </div>
+
+  <!-- BODY -->
+  <div class="body">
+
+    <div class="field">
+      <label for="age">Your Age</label>
+      <select id="age">
+        <option value="" disabled selected>Select your age range</option>
+        <option value="3">18 – 29 years old</option>
+        <option value="2">30 – 39 years old</option>
+        <option value="1">40 – 44 years old</option>
+        <option value="0">45 years or older</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="education">Highest Education Level</label>
+      <select id="education">
+        <option value="" disabled selected>Select your education</option>
+        <option value="3">Master's / PhD / Professional Degree</option>
+        <option value="2">Bachelor's Degree (3–4 years)</option>
+        <option value="1">Diploma / Trade Certificate (1–2 years)</option>
+        <option value="0">High School or below</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="english">English Proficiency (CLB/IELTS equivalent)</label>
+      <select id="english">
+        <option value="" disabled selected>Select your level</option>
+        <option value="3">CLB 9+ / IELTS 7.5+ (Advanced)</option>
+        <option value="2">CLB 7–8 / IELTS 6.0–7.0 (Upper-Intermediate)</option>
+        <option value="1">CLB 5–6 / IELTS 5.0–5.5 (Intermediate)</option>
+        <option value="0">CLB 4 or below / IELTS under 5.0</option>
+      </select>
+    </div>
+
+    <hr class="divider"/>
+
+    <button class="btn" onclick="calculate()">Check My Eligibility →</button>
+
+    <!-- RESULT -->
+    <div class="result" id="result">
+      <div class="r-tag" id="r-tag"></div>
+      <div class="r-title" id="r-title"></div>
+      <div class="r-body" id="r-body"></div>
+      <div class="r-note">* This is an indicative assessment only. Actual CRS scores depend on additional factors. Consult a registered immigration consultant for personalized advice.</div>
+    </div>
+
+  </div><!-- /body -->
+
+  <div class="footer">Not legal advice &nbsp;·&nbsp; For informational purposes only &nbsp;·&nbsp; &copy; 2025</div>
+
+</div><!-- /widget -->
+
+<script>
+  function calculate() {
+    const age = document.getElementById('age').value;
+    const edu = document.getElementById('education').value;
+    const eng = document.getElementById('english').value;
+
+    if (age === '' || edu === '' || eng === '') {
+      alert('Please answer all three questions before checking your eligibility.');
+      return;
+    }
+
+    const score = parseInt(age) + parseInt(edu) + parseInt(eng);
+    const el = document.getElementById('result');
+    const tag   = document.getElementById('r-tag');
+    const title = document.getElementById('r-title');
+    const body  = document.getElementById('r-body');
+
+    el.className = 'result';
+
+    const messages = {
+      strong: [
+        { title: "Strong Eligibility – You Look Like a Great Candidate!", body: "Your profile scores well across age, education, and language — three of the heaviest CRS factors. Express Entry and Provincial Nominee Programs (PNPs) are worth exploring right away. At this level, many applicants receive ITAs within one or two draw cycles." },
+        { title: "Excellent Profile — PR Is Well Within Reach", body: "A young, well-educated, fluent candidate is precisely what Canada's immigration system rewards. Your Comprehensive Ranking System (CRS) score is likely competitive. Consider getting an official CRS calculation and preparing your Express Entry profile immediately." },
+      ],
+      moderate: [
+        { title: "Moderate Eligibility – Promising, With Room to Strengthen", body: "Your profile shows real potential but one or two factors are holding back your CRS score. Improving your IELTS/CELPIP result or pursuing further education can meaningfully boost your ranking. Provincial Nominee Programs (PNPs) may offer a viable alternative path." },
+        { title: "Good Foundation — Strategic Improvements Can Make the Difference", body: "You're not far off. Targeted steps — such as retaking your English test or gaining Canadian work experience — can push your profile into a competitive range. A certified immigration consultant can map out the most efficient route for your situation." },
+      ],
+      weak: [
+        { title: "Lower Eligibility Right Now — But Not a Dead End", body: "Based on these three factors, your current profile may face challenges in a competitive draw. However, PR pathways exist for a wide range of profiles — including Atlantic Immigration, Rural and Northern Immigration, and Caregiver pilots. A professional assessment is strongly recommended." },
+        { title: "Challenging Profile — Alternative Pathways May Apply", body: "A score in this range suggests the standard Express Entry pool may be difficult at present. Focus on boosting your English proficiency first, as it has the largest single impact on CRS. Some PNPs also have lower score thresholds and occupation-specific streams worth exploring." },
+      ],
+    };
+
+    let tier, msgs;
+    if (score >= 7) {
+      tier = 'strong';  msgs = messages.strong;  el.classList.add('strong');
+    } else if (score >= 4) {
+      tier = 'moderate'; msgs = messages.moderate; el.classList.add('moderate');
+    } else {
+      tier = 'weak';    msgs = messages.weak;    el.classList.add('weak');
+    }
+
+    const pick = msgs[Math.floor(Math.random() * msgs.length)];
+    const tierLabel = { strong: '✅ Strong Match', moderate: '⚡ Moderate Match', weak: '⚠️ Lower Match' };
+
+    tag.textContent   = tierLabel[tier];
+    title.textContent = pick.title;
+    body.textContent  = pick.body;
+    el.style.display  = 'block';
+
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+</script>
+
+</body>
+</html>
